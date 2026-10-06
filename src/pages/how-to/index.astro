@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const guides = (await getCollection('how-to')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<BaseLayout title="How to" description="Short guides for using Chromascope.">
+  <h1 class="text-3xl font-semibold tracking-tight">How to</h1>
+  <ul class="mt-6 space-y-4">
+    {guides.map((guide) => (
+      <li>
+        <a
+          href={`/how-to/${guide.id}/`}
+          class="font-medium underline underline-offset-4"
+        >
+          {guide.data.title}
+        </a>
+        <p class="text-muted-foreground text-sm">{guide.data.description}</p>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

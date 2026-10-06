@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "rafi-tools": {
+      "source": { "source": "github", "repo": "therafiniac/claude-plugins" }
+    }
+  },
+  "enabledPlugins": {
+    "rafi@rafi-tools": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm check)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test *)",
+      "Bash(pnpm test:e2e)",
+      "Bash(pnpm lighthouse)",
+      "Bash(pnpm build)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log)",
+      "Bash(git log *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.production)",
+      "Read(./.env.staging)",
+      "Read(./secrets/**)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)"
+    ]
+  }
+}

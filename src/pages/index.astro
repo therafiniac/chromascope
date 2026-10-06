@@ -1,0 +1,24 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Chromascope"
+  description="Free color analysis for photographers. Load a photo, see its colors and harmonies, and export the palette. Runs on your device."
+>
+  <section class="max-w-2xl space-y-6">
+    <h1 class="text-4xl font-semibold tracking-tight">
+      See the colors in your photos.
+    </h1>
+    <p class="text-muted-foreground text-lg">
+      Load a photo, see its dominant colors and how they sit against color
+      harmonies, then export the palette. Free, private, and it works offline.
+    </p>
+    <a
+      href="/lab/"
+      class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-lg px-5 text-sm font-medium hover:opacity-90"
+    >
+      Open the Lab
+    </a>
+  </section>
+</BaseLayout>
