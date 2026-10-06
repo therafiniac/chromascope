@@ -15,7 +15,7 @@ Free, browser-based color analysis for photographers. Load a photo, see its domi
 | Tests         | Vitest, Playwright with axe, Lighthouse CI          |
 | Hosting       | Cloudflare Pages (free), not deployed yet           |
 
-Pending, with no stack profile yet: on-device storage (IndexedDB), color extraction and math, export.
+On-device storage (IndexedDB via `idb`) is in `src/lib/storage`. Pending, with no stack profile yet: color extraction and math, export.
 
 ## Commands
 

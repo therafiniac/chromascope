@@ -16,7 +16,7 @@ Free, browser-based color analysis tool for photographers: load a photo, see its
 - Pages in `src/pages`; how-to guides are Markdown in `src/content/how-to` (collection in `src/content.config.ts`). Ship no client JS except the islands that need it.
 - Offline: `public/sw.js` is filled in after `astro build` by `scripts/build-precache.mjs`. A new version waits for the user's "Update" click; never call `skipWaiting()` automatically.
 - UI: shadcn components in `src/components/ui`, tokens in `src/styles/global.css`, icons from lucide, font Inter via the Astro Fonts API.
-- Pending capabilities with no catalog profile yet: on-device storage (IndexedDB), color extraction and math, export. Run `/rafi:add-capability` for each before building the Lab.
+- On-device storage lives in `src/lib/storage` (idb, one `analyses` store). Open the database only from event handlers or effects, never at module top level. Pending capabilities with no catalog profile yet: color extraction and math, export.
 
 - Details: @docs/architecture.md
 - Stack-specific rules and audit checks: docs/stack-profile.md

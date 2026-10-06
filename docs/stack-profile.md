@@ -15,7 +15,7 @@
 | CMS                                                        | none (Markdown in the repo)                                                                 |
 | PWA / offline                                              | hand-written-sw (project draft, `docs/stack-drafts/capability-pwa.md`)                      |
 | Analytics, search, forms, payments, email, structured data | skipped                                                                                     |
-| On-device storage                                          | pending: not in catalog (IndexedDB via `idb`), run `/rafi:add-capability`                   |
+| On-device storage                                          | idb (project draft, `docs/stack-drafts/capability-on-device-storage.md`)                    |
 | Color extraction and math                                  | pending: not in catalog (`culori` plus k-means in a Web Worker), run `/rafi:add-capability` |
 | Export (PNG, JSON, hex, HSL)                               | pending: not in catalog (browser APIs), run `/rafi:add-capability`                          |
 
@@ -317,3 +317,41 @@ Conventions:
 - Repeat visit on a throttled connection loads from the cache without network requests for shell assets.
   Accessibility checks (added to accessibility-audit):
 - Install and update prompts work by keyboard and screen reader (see option sections).
+
+# Capability: On-device storage (idb)
+
+Setup: `idb` (runtime dependency) and `fake-indexeddb` (dev dependency, for tests, because jsdom has no IndexedDB). Files:
+
+- `src/lib/storage/db.ts`: a `DBSchema` interface, one exported `DB_VERSION` constant, and `openDB` with `upgrade`, `blocked`, and `blocking` handlers.
+- `src/lib/storage/<records>.ts`: a small repository per record type (list, get, put, delete) that parses every record with a Zod schema.
+- `src/lib/storage/persist.ts`: `persist()` and `estimate()` helpers (see Shared).
+  Conventions:
+- Open the database lazily from an event handler or effect. Never at module top level: static builds and server rendering have no `indexedDB`.
+- `upgrade(db, oldVersion, newVersion, tx)` runs one step per version, selected by `oldVersion`. Shipped steps are never edited; a change adds a new version and a new step.
+- `blocking` closes the connection so another tab can upgrade. `blocked` shows a message asking the user to close other tabs.
+- `await tx.done` after writes. Group related writes into one transaction.
+  Sources: https://github.com/jakearchibald/idb , https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+
+## Shared
+
+Conventions:
+
+- Store derived data only (for example a palette, settings, and a small thumbnail), not original photos, unless the PRD says otherwise.
+- Store one record per item. Do not keep the whole app state as one record: structured cloning runs on the main thread, so large objects block it.
+- Store a thumbnail as an `ArrayBuffer` plus its MIME type, with a maximum pixel size and byte size. Older WebKit bugs reported failures storing `Blob` in IndexedDB on iOS, and I could not confirm their current status, so avoid `Blob` records.
+- Every record carries a `schemaVersion`. Every read is parsed with a Zod schema. A record that fails parsing is skipped and reported to the user; it never crashes the app.
+- Set a maximum item count and total size. When a limit is reached, ask the user what to delete. Never delete silently.
+- Handle every failure at the storage boundary: the database cannot open (for example private browsing), a write throws, or `QuotaExceededError` occurs. The rest of the app keeps working and shows a message in text that offers to delete old items or export.
+- After the first successful save, call `navigator.storage.persist()` and show the result in plain text. Show usage from `navigator.storage.estimate()`. A refusal is normal; do not treat it as an error.
+- Browsers can evict best-effort storage. Eviction deletes an origin's data all at once, which includes IndexedDB and the Cache API (the PWA precache). Safari also clears script-created storage for an origin after 7 days with no user interaction. Always offer an export of saved data (JSON) and an import that validates the file with a schema before writing anything.
+- Tests: use `fake-indexeddb` (`setupFiles: ['fake-indexeddb/auto']` in the Vitest config; reset between tests with `indexedDB = new IDBFactory()`). Its README documents Jest; for Vitest and jsdom confirm that it works and whether a `structuredClone` polyfill is needed.
+  Security checks (added to security-audit):
+- Saved items, thumbnails, and palettes derived from a user's photos are personal data: they are never logged, never sent to a server, and never read by a third-party script.
+- An imported file is validated with a schema, with a size limit, before it is written to the database.
+  Performance checks (added to performance-audit):
+- Lists read bounded sets (a cursor or a capped count), and list views do not load full records when metadata is enough.
+- No transaction stays open across a `fetch` or a user prompt.
+- Writing and reading large records does not block input: measure with a representative number of saved items.
+  Accessibility checks (added to accessibility-audit):
+- Storage errors, quota messages, and the persistence result are announced through a live region and are readable as text, not only by color or icon.
+- Delete and export actions are keyboard operable and have accessible names.

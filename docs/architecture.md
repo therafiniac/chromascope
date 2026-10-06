@@ -16,7 +16,7 @@ src/layouts/          BaseLayout: head, skip link, nav, footer, update prompt
 src/components/       SEO.astro, UpdatePrompt.tsx, ui/ (shadcn)
 src/content/how-to/   Markdown guides (collection in src/content.config.ts)
 src/styles/           global.css (Tailwind import, design tokens)
-src/lib/              shared helpers (cn)
+src/lib/              shared helpers (cn), storage/ (on-device IndexedDB layer)
 public/               sw.js, manifest, icons, _headers, robots.txt
 scripts/              build-precache.mjs (post-build step for the service worker)
 e2e/                  Playwright tests (accessibility, offline, manifest)
@@ -24,7 +24,7 @@ e2e/                  Playwright tests (accessibility, offline, manifest)
 
 ## Data model
 
-None on the server. Planned on-device storage: saved analyses in IndexedDB (not built yet).
+None on the server. On-device: IndexedDB database `chromascope`, store `analyses` (key `id`, index `by-created-at`), records validated by `src/lib/storage/schema.ts`. Limits: 100 items, 100 KiB per thumbnail.
 
 ## API or route map
 
